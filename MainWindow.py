@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel
+from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QRadioButton
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt
 import requests
@@ -16,6 +16,9 @@ class MainWindow(QMainWindow):
     SEARCH_API_KEY = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
     SEARCH_SERVER = "https://search-maps.yandex.ru/v1"
 
+    LIGHT = "light"
+    DARK = "dark"
+
     def __init__(self):
         super().__init__()
 
@@ -30,14 +33,31 @@ class MainWindow(QMainWindow):
 
         self.curr_pos = [55.62264, 40.68533]
         self.curr_zoom = 17
+        self.curr_theme = self.LIGHT
 
+        self.dark_theme = QRadioButton(self)
+        self.dark_theme.setText("Тёмная тема")
+        self.dark_theme.setGeometry(620, 50, 100, 30)
+        self.dark_theme.clicked.connect(lambda: self.set_theme(self.DARK))
+
+        self.light_theme = QRadioButton(self)
+        self.light_theme.setText("Светлая тема")
+        self.light_theme.setGeometry(620, 20, 100, 30)
+        self.light_theme.clicked.connect(lambda: self.set_theme(self.LIGHT))
+        self.light_theme.setChecked(True)
+
+        self.load_map()
+
+    def set_theme(self, theme):
+        self.curr_theme = theme
         self.load_map()
 
     def load_map(self):
         str_pos = ",".join(list(map(str, self.curr_pos[::-1])))
         params = {"apikey": self.STATIC_API_KEY,
                   "ll": str_pos,
-                  "z": self.curr_zoom}
+                  "z": self.curr_zoom,
+                  "theme": self.curr_theme}
         response = requests.get(self.STATIC_SERVER, params=params)
         if not response:
             print(f"Static API Error: {response.status_code}")
@@ -49,7 +69,6 @@ class MainWindow(QMainWindow):
         os.remove("map.png")
 
     def keyPressEvent(self, event):
-        print(self.curr_pos)
         move = 0.00001 * 2 ** (22 - self.curr_zoom)
         if event.key() == Qt.Key.Key_PageUp and self.curr_zoom < 21:
             self.curr_zoom += 1
