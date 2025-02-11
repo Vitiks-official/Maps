@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         self.map_label.setGeometry(200, 20, 400, 400)
         self.map_label.setPixmap(self.pixmap)
 
-        self.curr_pos = (55.62264, 40.68533)
+        self.curr_pos = [55.62264, 40.68533]
         self.curr_zoom = 17
 
         self.load_map()
@@ -49,12 +49,23 @@ class MainWindow(QMainWindow):
         os.remove("map.png")
 
     def keyPressEvent(self, event):
-        if ((event.key() == Qt.Key.Key_PageUp or event.key() == Qt.Key.Key_Up) and
-                self.curr_zoom < 21):
+        print(self.curr_pos)
+        move = 0.00001 * 2 ** (22 - self.curr_zoom)
+        if event.key() == Qt.Key.Key_PageUp and self.curr_zoom < 21:
             self.curr_zoom += 1
-        elif ((event.key() == Qt.Key.Key_PageDown or event.key() == Qt.Key.Key_Down) and
-              self.curr_zoom > 0):
+        elif event.key() == Qt.Key.Key_PageDown and self.curr_zoom > 0:
             self.curr_zoom -= 1
+        elif event.key() == Qt.Key.Key_Up and abs(self.curr_pos[0] + move) < 90:
+            self.curr_pos[0] += move
+        elif event.key() == Qt.Key.Key_Down and abs(self.curr_pos[0] - move) < 90:
+            self.curr_pos[0] -= move
+        elif event.key() == Qt.Key.Key_Right and abs(self.curr_pos[1] + move) < 180:
+            self.curr_pos[1] += move
+        elif event.key() == Qt.Key.Key_Left and abs(self.curr_pos[1] - move) < 180:
+            self.curr_pos[1] -= move
+        else:
+            return None
+
         self.load_map()
 
 
