@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QRadioButton
+from PyQt6.QtWidgets import QMainWindow, QLabel, QRadioButton, QPushButton
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt
+from MyLineEdit import MyLineEdit
 import requests
 import sys
 import os
@@ -34,16 +35,27 @@ class MainWindow(QMainWindow):
         self.curr_pos = [55.62264, 40.68533]
         self.curr_zoom = 17
         self.curr_theme = self.LIGHT
+        self.curr_tag = ""
+
+        self.address = MyLineEdit(self)
+        self.address.setGeometry(20, 440, 600, 30)
+
+        self.find_btn = QPushButton(self)
+        self.find_btn.setText("Искать")
+        self.find_btn.setGeometry(630, 440, 150, 30)
+        self.find_btn.clicked.connect(self.find_address)
 
         self.dark_theme = QRadioButton(self)
         self.dark_theme.setText("Тёмная тема")
         self.dark_theme.setGeometry(620, 50, 100, 30)
         self.dark_theme.clicked.connect(lambda: self.set_theme(self.DARK))
+        self.dark_theme.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.light_theme = QRadioButton(self)
         self.light_theme.setText("Светлая тема")
         self.light_theme.setGeometry(620, 20, 100, 30)
         self.light_theme.clicked.connect(lambda: self.set_theme(self.LIGHT))
+        self.light_theme.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.light_theme.setChecked(True)
 
         self.load_map()
@@ -52,12 +64,36 @@ class MainWindow(QMainWindow):
         self.curr_theme = theme
         self.load_map()
 
+    def find_address(self):
+        self.setFocus()
+        geocode = self.address.text()
+        if not geocode:
+            return None
+        params = {"apikey": self.GEO_API_KEY,
+                  "geocode": geocode,
+                  "format": "json"}
+        response = requests.get(self.GEO_SERVER, params=params)
+        if not response:
+            print(f"Geocoder API Error: {response.status_code}")
+            sys.exit()
+
+        data = response.json()
+        objects = data["response"]["GeoObjectCollection"]["featureMember"]
+        if not objects:
+            return None
+        obj = objects[0]["GeoObject"]
+        pos = obj["Point"]["pos"]
+        self.curr_pos = [float(x) for x in pos.split()[::-1]]
+        self.curr_tag = ",".join(pos.split()) + ",comma"
+        self.load_map()
+
     def load_map(self):
         str_pos = ",".join(list(map(str, self.curr_pos[::-1])))
         params = {"apikey": self.STATIC_API_KEY,
                   "ll": str_pos,
                   "z": self.curr_zoom,
-                  "theme": self.curr_theme}
+                  "theme": self.curr_theme,
+                  "pt": self.curr_tag}
         response = requests.get(self.STATIC_SERVER, params=params)
         if not response:
             print(f"Static API Error: {response.status_code}")
