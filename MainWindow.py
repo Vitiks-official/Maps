@@ -74,6 +74,7 @@ class MainWindow(QMainWindow):
 
     def reset_result(self):
         self.curr_tag = ""
+        self.address_browser.clear()
         self.load_map()
 
     def find_address(self):
