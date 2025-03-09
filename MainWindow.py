@@ -1,4 +1,6 @@
-from PyQt6.QtWidgets import QMainWindow, QLabel, QRadioButton, QPushButton
+from pprint import pprint
+
+from PyQt6.QtWidgets import QMainWindow, QLabel, QRadioButton, QPushButton, QTextBrowser
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt
 from MyLineEdit import MyLineEdit
@@ -48,6 +50,9 @@ class MainWindow(QMainWindow):
         self.reset_btn.setGeometry(20, 440, 100, 30)
         self.reset_btn.clicked.connect(self.reset_result)
 
+        self.address_browser = QTextBrowser(self)
+        self.address_browser.setGeometry(20, 20, 160, 200)
+
         self.dark_theme = QRadioButton(self)
         self.dark_theme.setText("Тёмная тема")
         self.dark_theme.setGeometry(620, 50, 100, 30)
@@ -90,6 +95,8 @@ class MainWindow(QMainWindow):
             return None
         obj = objects[0]["GeoObject"]
         pos = obj["Point"]["pos"]
+        address = obj["metaDataProperty"]["GeocoderMetaData"]["text"]
+        self.address_browser.setText(address)
         self.curr_pos = [float(x) for x in pos.split()[::-1]]
         self.curr_tag = ",".join(pos.split()) + ",comma"
         self.load_map()
@@ -129,5 +136,3 @@ class MainWindow(QMainWindow):
             return None
 
         self.load_map()
-
-
