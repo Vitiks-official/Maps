@@ -38,12 +38,15 @@ class MainWindow(QMainWindow):
         self.curr_tag = ""
 
         self.address = MyLineEdit(self)
-        self.address.setGeometry(20, 440, 600, 30)
+        self.address.setGeometry(140, 440, 520, 30)
 
-        self.find_btn = QPushButton(self)
-        self.find_btn.setText("Искать")
-        self.find_btn.setGeometry(630, 440, 150, 30)
+        self.find_btn = QPushButton("Искать", self)
+        self.find_btn.setGeometry(680, 440, 100, 30)
         self.find_btn.clicked.connect(self.find_address)
+
+        self.reset_btn = QPushButton("Сброс", self)
+        self.reset_btn.setGeometry(20, 440, 100, 30)
+        self.reset_btn.clicked.connect(self.reset_result)
 
         self.dark_theme = QRadioButton(self)
         self.dark_theme.setText("Тёмная тема")
@@ -62,6 +65,10 @@ class MainWindow(QMainWindow):
 
     def set_theme(self, theme):
         self.curr_theme = theme
+        self.load_map()
+
+    def reset_result(self):
+        self.curr_tag = ""
         self.load_map()
 
     def find_address(self):
