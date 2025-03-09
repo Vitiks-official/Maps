@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         self.postal_code = QCheckBox(self)
         self.postal_code.setText("Почтовый индекс")
         self.postal_code.setGeometry(40, 225, 160, 30)
+        self.postal_code.clicked.connect(self.find_address)
 
         self.dark_theme = QRadioButton(self)
         self.dark_theme.setText("Тёмная тема")
@@ -101,7 +102,6 @@ class MainWindow(QMainWindow):
         obj = objects[0]["GeoObject"]
         pos = obj["Point"]["pos"]
         metadata = obj["metaDataProperty"]["GeocoderMetaData"]
-        pprint(obj)
         postal_code = ""
         if self.postal_code.isChecked() and "postal_code" in metadata["Address"]:
             postal_code = metadata["Address"]["postal_code"]
